@@ -1,0 +1,26 @@
+# Virtual Environments
+venv/
+venv_win/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database & Data Exports
+database/*.db
+*.csv
+
+# Snapshot Bukti Absensi Lokal & Profile Temp
+data/snapshots/*.jpg
+data/faces/*/*.jpg
+!data/faces/.gitkeep
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
