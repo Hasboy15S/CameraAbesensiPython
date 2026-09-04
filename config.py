@@ -10,6 +10,10 @@
 
 import os                          # Library standar Python untuk berinteraksi dengan sistem operasi
 from pathlib import Path           # Library modern Python untuk memanipulasi path direktori/file secara rapi
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 # ------------------------------------------------------------------------------
 # 1. PENGATURAN STRUKTUR DIREKTORI (FOLDER PATHS)
@@ -42,7 +46,9 @@ MODELS_DIR.mkdir(parents=True, exist_ok=True)
 # - Angka 1, 2, dst: Jika ada beberapa webcam USB terpasang.
 # - String RTSP (contoh: "rtsp://admin:pass@192.168.1.100:554/stream"):
 #   Jika ingin menghubungkan langsung ke CCTV / IP Camera di kantor/sekolah.
-CAMERA_SOURCE = 0
+_cam_source = os.getenv("CAMERA_SOURCE", "0")
+# Jika cam_source hanya berisi angka, ubah jadi integer
+CAMERA_SOURCE = int(_cam_source) if _cam_source.isdigit() else _cam_source
 
 # Resolusi ideal penangkapan frame video (lebar x tinggi dalam pixel)
 FRAME_WIDTH = 1280
@@ -60,7 +66,7 @@ FRAME_HEIGHT = 720
 #   * Jika nilai dinaikkan (misal 0.65): AI sangat ketat, mengurangi salah kenal (false positive),
 #     tapi mungkin agak susah mengenali jika pencahayaan kurang.
 #   * Jika nilai diturunkan (misal 0.45): AI lebih mudah mengenali, tapi rawan tertukar dengan orang lain.
-SIMILARITY_THRESHOLD = 0.55
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.55"))
 
 # ------------------------------------------------------------------------------
 # 4. LOGIKA BISNIS ABSENSI (ATTENDANCE LOGIC)
@@ -70,11 +76,15 @@ SIMILARITY_THRESHOLD = 0.55
 # kamera selama 5 detik, tanpa jeda sistem akan mencatat 150 kali absensi!
 # Dengan cooldown 300 detik (5 menit), setelah "Budi" tercatat absen, wajah Budi tidak akan
 # disimpan ulang ke database selama 5 menit berikutnya.
-ATTENDANCE_COOLDOWN_SECONDS = 300  # 5 Menit (dalam satuan detik)
+ATTENDANCE_COOLDOWN_SECONDS = int(os.getenv("ATTENDANCE_COOLDOWN_SECONDS", "300"))
 
 # ATTENDANCE_MODE:
 # - "AUTO" : Logika pintar -> Jika di hari ini user belum absen, maka otomatis dicatat "MASUK".
 #            Jika sudah pernah absen "MASUK", scan berikutnya dicatat "PULANG".
 # - "IN"   : Mengunci sistem hanya untuk absensi masuk (misal di pintu gerbang pagi hari).
 # - "OUT"  : Mengunci sistem hanya untuk absensi pulang (misal di sore hari).
-ATTENDANCE_MODE = "AUTO"
+ATTENDANCE_MODE = os.getenv("ATTENDANCE_MODE", "AUTO")
+
+# TELEGRAM BOT CONFIG
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")

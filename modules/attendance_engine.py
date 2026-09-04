@@ -24,7 +24,9 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from typing import Dict, Optional, Tuple, List
-from config import SNAPSHOTS_DIR, ATTENDANCE_COOLDOWN_SECONDS, ATTENDANCE_MODE
+import threading
+import requests
+from config import SNAPSHOTS_DIR, ATTENDANCE_COOLDOWN_SECONDS, ATTENDANCE_MODE, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from database.db import get_all_users, get_last_attendance, record_attendance
 
 class AttendanceEngine:
@@ -57,6 +59,45 @@ class AttendanceEngine:
         """
         self.known_users = get_all_users()
         print(f"[AttendanceEngine] Memuat {len(self.known_users)} pengguna terdaftar dari database.")
+
+    def _send_telegram_notification(self, event_data: dict):
+        """
+        Kirim pesan ke Telegram secara asinkron agar tidak memblokir laju frame kamera.
+        """
+        if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+            return
+
+        def send_task():
+            try:
+                status_label = "✅ MASUK" if event_data["status"] == "IN" else "👋 PULANG"
+                caption = (
+                    f"📸 [ABSEN {status_label}]\n"
+                    f"━━━━━━━━━━━━━━━━\n"
+                    f"👤 Nama   : {event_data['name']}\n"
+                    f"🔢 Kode   : {event_data['user_code']}\n"
+                    f"🏢 Divisi : {event_data['department']}\n"
+                    f"🕐 Waktu  : {event_data['timestamp']}\n"
+                    f"📊 Akurasi: {event_data['confidence']*100:.1f}%\n"
+                    f"━━━━━━━━━━━━━━━━"
+                )
+                
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+                data = {"chat_id": TELEGRAM_CHAT_ID, "caption": caption}
+                
+                snapshot_path = SNAPSHOTS_DIR / event_data["snapshot"]
+                if snapshot_path.exists():
+                    with open(snapshot_path, "rb") as photo:
+                        files = {"photo": photo}
+                        requests.post(url, data=data, files=files, timeout=10)
+                else:
+                    # Fallback ke pesan teks jika foto gagal dimuat
+                    text_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+                    requests.post(text_url, data={"chat_id": TELEGRAM_CHAT_ID, "text": caption}, timeout=10)
+            except Exception as e:
+                print(f"[ERROR] Gagal mengirim notifikasi Telegram: {e}")
+
+        # Jalankan di background thread
+        threading.Thread(target=send_task, daemon=True).start()
 
     def process_face(self, user: Dict, confidence: float, frame=None, manual_mode: Optional[str] = None) -> Dict:
         """
@@ -176,6 +217,9 @@ class AttendanceEngine:
         
         status_label = "MASUK" if status == "IN" else "PULANG"
         msg = f"Berhasil Absen [{status_label}]: {user_name} (Akurasi: {confidence*100:.1f}%)"
+        
+        # Kirim notifikasi Telegram
+        self._send_telegram_notification(event_data)
         
         return {
             "is_recorded": True,
