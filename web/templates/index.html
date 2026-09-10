@@ -1,204 +1,1205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Camera Absensi Dashboard</title>
+    <title>AI Camera Absensi Dashboard | Vision Core</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfeff',
+                            100: '#cffafe',
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        },
+                        dark: {
+                            950: '#060911',
+                            900: '#0b101d',
+                            850: '#101728',
+                            800: '#17223b',
+                            700: '#233254',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    animation: {
+                        'scanline': 'scan 3s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%': { transform: 'translateY(0%)', opacity: '0.9' },
+                            '50%': { opacity: '0.4' },
+                            '100%': { transform: 'translateY(100%)', opacity: '0.9' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(56, 189, 248, 0.25) rgba(15, 23, 42, 0.6);
+        }
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(11, 16, 29, 0.8);
+        }
+        *::-webkit-scrollbar-thumb {
+            background: rgba(34, 211, 238, 0.25);
+            border-radius: 9999px;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 211, 238, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(16, 23, 40, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        }
+
+        .glass-panel-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel-hover:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 15px 35px -5px rgba(6, 182, 212, 0.15), 0 0 20px 0 rgba(34, 211, 238, 0.1) inset;
+            transform: translateY(-2px);
+        }
+
+        .cyber-corner-tl {
+            position: absolute; top: 12px; left: 12px;
+            width: 18px; height: 18px;
+            border-top: 2px solid #22d3ee;
+            border-left: 2px solid #22d3ee;
+            pointer-events: none;
+        }
+        .cyber-corner-tr {
+            position: absolute; top: 12px; right: 12px;
+            width: 18px; height: 18px;
+            border-top: 2px solid #22d3ee;
+            border-right: 2px solid #22d3ee;
+            pointer-events: none;
+        }
+        .cyber-corner-bl {
+            position: absolute; bottom: 12px; left: 12px;
+            width: 18px; height: 18px;
+            border-bottom: 2px solid #22d3ee;
+            border-left: 2px solid #22d3ee;
+            pointer-events: none;
+        }
+        .cyber-corner-br {
+            position: absolute; bottom: 12px; right: 12px;
+            width: 18px; height: 18px;
+            border-bottom: 2px solid #22d3ee;
+            border-right: 2px solid #22d3ee;
+            pointer-events: none;
+        }
+
+        .laser-scanline {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #22d3ee, #38bdf8, #818cf8, transparent);
+            box-shadow: 0 0 15px 3px rgba(34, 211, 238, 0.7);
+            animation: scan 3.5s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .laser-glow-bg {
+            background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 70%);
+        }
+
+        @keyframes scan {
+            0% { top: 3%; opacity: 0.1; }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% { top: 97%; opacity: 0.1; }
+        }
+
+        /* Toast animation */
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-    <!-- Navbar -->
-    <nav class="bg-blue-600 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-camera-retro text-2xl"></i>
-                    <span class="font-bold text-xl tracking-wider">AbsensiYolo Dashboard</span>
-                </div>
-                <div>
-                    <span class="text-sm font-medium bg-blue-700 py-1 px-3 rounded-full flex items-center">
-                        <span class="relative flex h-3 w-3 mr-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+<body class="bg-dark-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- Background Ambient Glows -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute -top-40 left-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-20 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-20"></div>
+    </div>
+
+    <!-- Top Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col space-y-3 pointer-events-none"></div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-dark-950/80 backdrop-blur-xl">
+        <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Brand / Logo -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-cyan-500 to-indigo-600 shadow-lg shadow-cyan-500/25 p-[2px]">
+                        <div class="w-full h-full bg-dark-950 rounded-[14px] flex items-center justify-center">
+                            <i class="fa-solid fa-expand text-brand-400 text-xl"></i>
+                        </div>
+                        <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-dark-950"></span>
                         </span>
-                        Sistem Online
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="text-xl font-black tracking-tight text-white uppercase flex items-center gap-1.5">
+                                Absensi<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">Yolo</span>
+                            </h1>
+                            <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 font-bold">
+                                Vision Core v2.0
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                            <span>OpenCV YuNet + SFace Deep Learning</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="system-status" class="text-emerald-400 font-medium flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Live Engine Online
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Center: Interactive Mode Switcher -->
+                <div class="hidden md:flex items-center bg-dark-900/90 border border-slate-800 rounded-2xl p-1.5 shadow-inner">
+                    <span class="text-xs font-mono text-slate-400 px-3 uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders text-brand-400 text-xs"></i> Mode:
                     </span>
+                    <div class="flex items-center space-x-1" id="mode-selector">
+                        <button onclick="setMode('AUTO')" id="btn-mode-auto" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 {{ 'bg-brand-500 text-white shadow-lg shadow-brand-500/25' if current_mode == 'AUTO' else 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-bolt text-xs"></i>
+                            <span>AUTO</span>
+                        </button>
+                        <button onclick="setMode('IN')" id="btn-mode-in" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 {{ 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' if current_mode == 'IN' else 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                            <span>MASUK</span>
+                        </button>
+                        <button onclick="setMode('OUT')" id="btn-mode-out" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 {{ 'bg-amber-500 text-white shadow-lg shadow-amber-500/25' if current_mode == 'OUT' else 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            <span>PULANG</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Clock & Action Buttons -->
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    
+                    <!-- Realtime Clock Widget -->
+                    <div class="hidden xl:flex flex-col items-end px-3.5 py-1.5 rounded-xl bg-dark-900/60 border border-slate-800/80">
+                        <div class="text-base font-mono font-bold tracking-tight text-brand-400" id="digital-clock">00:00:00 WIB</div>
+                        <div class="text-[11px] text-slate-400 font-medium" id="digital-date">-</div>
+                    </div>
+
+                    <!-- Sound Toggle Button -->
+                    <button onclick="toggleAudio()" id="btn-audio" title="Aktifkan/Nonaktifkan Suara Notifikasi" class="relative p-2.5 rounded-xl bg-dark-900/80 border border-slate-800 text-slate-400 hover:text-brand-400 hover:border-slate-700 transition">
+                        <i class="fa-solid fa-volume-high text-base" id="audio-icon"></i>
+                        <span id="audio-indicator" class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-dark-950"></span>
+                    </button>
+
+                    <!-- Employee Directory Modal Button -->
+                    <button onclick="openUsersModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-dark-900/80 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 hover:bg-slate-800/60 transition text-xs font-semibold">
+                        <i class="fa-solid fa-users text-indigo-400"></i>
+                        <span class="hidden sm:inline">Daftar Karyawan</span>
+                    </button>
+
+                    <!-- CSV Export Button -->
+                    <a href="/api/export" download class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-500 transition text-xs font-bold tracking-wide">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span class="hidden sm:inline">Export CSV</span>
+                    </a>
+
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-        
-        <!-- Stats Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center space-x-4 transition transform hover:scale-105">
-                <div class="bg-blue-100 p-3 rounded-lg">
-                    <i class="fas fa-users text-blue-600 text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Total Karyawan</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ total_users }}</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center space-x-4 transition transform hover:scale-105">
-                <div class="bg-green-100 p-3 rounded-lg">
-                    <i class="fas fa-check-circle text-green-600 text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Hadir Hari Ini</p>
-                    <p class="text-3xl font-bold text-gray-800" id="stat-hadir">{{ total_attendance }}</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center space-x-4 transition transform hover:scale-105">
-                <div class="bg-purple-100 p-3 rounded-lg">
-                    <i class="fas fa-clock text-purple-600 text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Waktu Server</p>
-                    <p class="text-2xl font-bold text-gray-800" id="clock">00:00:00</p>
-                </div>
+    <!-- CONTENT WRAPPER -->
+    <main class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full z-10">
+
+        <!-- MOBILE MODE SWITCHER (Visible only on small screens) -->
+        <div class="md:hidden flex items-center justify-between bg-dark-900 border border-slate-800 rounded-2xl p-2 mb-6">
+            <span class="text-xs font-mono text-slate-400 font-semibold px-2">Mode:</span>
+            <div class="flex items-center space-x-1.5 flex-1 justify-end">
+                <button onclick="setMode('AUTO')" id="btn-mode-auto-m" class="px-3 py-1 rounded-xl text-xs font-bold {{ 'bg-brand-500 text-white' if current_mode == 'AUTO' else 'text-slate-400 bg-slate-800' }}">AUTO</button>
+                <button onclick="setMode('IN')" id="btn-mode-in-m" class="px-3 py-1 rounded-xl text-xs font-bold {{ 'bg-emerald-500 text-white' if current_mode == 'IN' else 'text-slate-400 bg-slate-800' }}">IN</button>
+                <button onclick="setMode('OUT')" id="btn-mode-out-m" class="px-3 py-1 rounded-xl text-xs font-bold {{ 'bg-amber-500 text-white' if current_mode == 'OUT' else 'text-slate-400 bg-slate-800' }}">OUT</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+        <!-- STATS & KPI METRICS ROW -->
+        <section class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
             
-            <!-- Live Camera Feed -->
-            <div class="lg:col-span-2 flex flex-col">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex-grow flex flex-col">
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                        <h2 class="font-bold text-gray-700"><i class="fas fa-video mr-2 text-red-500"></i> Live Camera Monitor</h2>
+            <!-- Card 1: Total Karyawan -->
+            <div class="glass-panel glass-panel-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs uppercase tracking-wider font-mono font-semibold text-slate-400">Total Karyawan</span>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                        <i class="fa-solid fa-users text-base"></i>
                     </div>
-                    <div class="p-4 bg-gray-900 flex justify-center items-center flex-grow" style="min-h: 480px;">
-                        <img src="/video_feed" alt="Live Stream Camera" class="rounded shadow-lg w-full h-full object-contain border border-gray-700">
+                </div>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white" id="stat-total-users">{{ total_users }}</span>
+                    <span class="text-xs text-slate-400 font-medium">Orang</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-database text-[10px] text-indigo-400"></i> Database Terdaftar
+                </p>
+            </div>
+
+            <!-- Card 2: Hadir Hari Ini -->
+            <div class="glass-panel glass-panel-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs uppercase tracking-wider font-mono font-semibold text-slate-400">Hadir Hari Ini</span>
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                        <i class="fa-solid fa-user-check text-base"></i>
                     </div>
+                </div>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-cyan-400" id="stat-unique-today">{{ unique_today }}</span>
+                    <span class="text-xs text-slate-400 font-medium">/ <span id="stat-total-users-sub">{{ total_users }}</span></span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-bolt text-[10px] text-cyan-400"></i> <span id="stat-total-attendance">{{ total_attendance }}</span> Kali Absen Tercatat
+                </p>
+            </div>
+
+            <!-- Card 3: Check-In Masuk -->
+            <div class="glass-panel glass-panel-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs uppercase tracking-wider font-mono font-semibold text-slate-400">Absen Masuk</span>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-base"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400" id="stat-in-count">{{ in_count }}</span>
+                    <span class="text-xs text-slate-400 font-medium">Log Masuk</span>
+                </div>
+                <p class="text-[11px] text-emerald-400/90 mt-1 flex items-center gap-1 font-medium">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i> Status Masuk Aktif
+                </p>
+            </div>
+
+            <!-- Card 4: Check-Out Pulang -->
+            <div class="glass-panel glass-panel-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs uppercase tracking-wider font-mono font-semibold text-slate-400">Absen Pulang</span>
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-amber-400" id="stat-out-count">{{ out_count }}</span>
+                    <span class="text-xs text-slate-400 font-medium">Log Pulang</span>
+                </div>
+                <p class="text-[11px] text-amber-400/90 mt-1 flex items-center gap-1 font-medium">
+                    <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Selesai Jam Kerja
+                </p>
+            </div>
+
+            <!-- Card 5: Persentase Kehadiran (Spans full on mobile) -->
+            <div class="col-span-2 md:col-span-4 lg:col-span-1 glass-panel glass-panel-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs uppercase tracking-wider font-mono font-semibold text-slate-400">Rate Kehadiran</span>
+                        <span class="text-xs font-mono font-bold text-brand-400" id="stat-rate-badge">{{ attendance_rate }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden my-2">
+                        <div id="stat-progress-bar" class="bg-gradient-to-r from-brand-500 to-emerald-400 h-2.5 rounded-full transition-all duration-700 shadow-md shadow-brand-500/50" style="width: {{ attendance_rate }}%;"></div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mt-2">
+                    <span>Target: 100%</span>
+                    <span class="text-emerald-400 font-semibold" id="stat-rate-text">{{ 'Optimal' if attendance_rate >= 75 else ('Sedang' if attendance_rate >= 40 else 'Awal Hari') }}</span>
                 </div>
             </div>
 
-            <!-- Recent Attendance Logs -->
-            <div class="lg:col-span-1 flex flex-col">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex-grow flex flex-col">
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                        <h2 class="font-bold text-gray-700"><i class="fas fa-history mr-2 text-blue-500"></i> Log Kehadiran Hari Ini</h2>
+        </section>
+
+        <!-- MAIN GRID: CAMERA STREAM & ATTENDANCE FEED -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT / CENTER: LIVE CAMERA MONITOR (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col space-y-4">
+                
+                <div class="glass-panel rounded-3xl overflow-hidden flex flex-col relative border border-slate-800/90 shadow-2xl" id="camera-container">
+                    
+                    <!-- Header Monitor Frame -->
+                    <div class="px-5 py-3.5 bg-dark-900/90 border-b border-slate-800/80 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="flex h-3 w-3 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-80"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs uppercase font-mono font-bold tracking-widest text-slate-200">LIVE CAMERA FEED</span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">REC</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Camera Action Badges -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[11px] font-mono bg-dark-950/80 text-slate-400 border border-slate-800 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                <i class="fa-solid fa-microchip text-brand-400"></i>
+                                <span>640x480 • 30 FPS</span>
+                            </span>
+                            <button onclick="toggleScanner()" id="btn-toggle-scanner" title="Toggle Laser Scanline" class="p-1.5 rounded-lg bg-dark-950 text-slate-400 hover:text-brand-400 border border-slate-800 transition">
+                                <i class="fa-solid fa-barcode text-xs"></i>
+                            </button>
+                            <button onclick="toggleFullscreenCamera()" title="Fullscreen Kamera" class="p-1.5 rounded-lg bg-dark-950 text-slate-400 hover:text-brand-400 border border-slate-800 transition">
+                                <i class="fa-solid fa-expand text-xs"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="p-0 overflow-auto flex-grow h-[480px]">
-                        <ul class="divide-y divide-gray-100" id="log-list">
+
+                    <!-- Video Viewport Frame -->
+                    <div class="relative bg-dark-950 flex items-center justify-center overflow-hidden min-h-[440px] sm:min-h-[500px]">
+                        
+                        <!-- Cyber Reticle Overlay Corners -->
+                        <div class="cyber-corner-tl"></div>
+                        <div class="cyber-corner-tr"></div>
+                        <div class="cyber-corner-bl"></div>
+                        <div class="cyber-corner-br"></div>
+
+                        <!-- Sci-Fi Scanner Line -->
+                        <div id="scanner-line" class="laser-scanline"></div>
+
+                        <!-- Live Stream MJPEG Image -->
+                        <img id="video-stream" 
+                             src="/video_feed" 
+                             alt="AI Face Recognition Live Stream" 
+                             class="w-full h-full object-contain select-none max-h-[600px] transition-all"
+                             onerror="handleStreamError(this)"
+                        >
+
+                        <!-- Stream Loading / Fallback Overlay (Hidden if stream works) -->
+                        <div id="stream-fallback" class="hidden absolute inset-0 bg-dark-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-10">
+                            <div class="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mb-4 animate-pulse">
+                                <i class="fa-solid fa-video-slash text-2xl"></i>
+                            </div>
+                            <h4 class="text-base font-bold text-white mb-1">Kamera Sedang Tidak Tersedia</h4>
+                            <p class="text-xs text-slate-400 max-w-sm mb-4">
+                                Pastikan kamera laptop/USB terpasang dengan baik dan tidak sedang dipakai oleh aplikasi lain (seperti Zoom atau Windows Camera).
+                            </p>
+                            <button onclick="reloadStream()" class="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Hubungkan Ulang
+                            </button>
+                        </div>
+
+                        <!-- Viewport HUD Overlay Badges -->
+                        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
+                            <div class="flex items-center space-x-2">
+                                <span id="hud-mode-pill" class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-dark-950/85 backdrop-blur-md border border-brand-500/40 text-brand-300 shadow-lg">
+                                    ⚡ MODE: {{ current_mode }}
+                                </span>
+                                <span class="text-xs font-mono px-3 py-1 rounded-full bg-dark-950/85 backdrop-blur-md border border-slate-700/60 text-slate-300">
+                                    AI: SFace (0.55)
+                                </span>
+                            </div>
+                            <span class="text-[11px] font-mono text-emerald-400 bg-dark-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                DETECTING
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Stream Status & Quick Tips -->
+                    <div class="px-5 py-3 bg-dark-900/60 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center gap-1.5 text-slate-300">
+                                <i class="fa-solid fa-circle-info text-brand-400"></i>
+                                <span>Posisikan wajah tepat di hadapan kamera (jarak 0.5 - 1.5 m)</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="reloadStream()" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate text-[11px]"></i> Refresh Stream
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT: REALTIME ATTENDANCE LOG FEED (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col space-y-4">
+                
+                <div class="glass-panel rounded-3xl overflow-hidden flex flex-col h-full min-h-[600px] border border-slate-800/90 shadow-2xl">
+                    
+                    <!-- Feed Header & Controls -->
+                    <div class="p-5 bg-dark-900/90 border-b border-slate-800/80 space-y-4">
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-white tracking-wide">Aktivitas Absensi Hari Ini</h3>
+                                    <p class="text-[11px] text-slate-400">Pembaruan otomatis tiap 3 detik</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700" id="log-count-badge">
+                                {{ today_records|length }} Catatan
+                            </span>
+                        </div>
+
+                        <!-- Live Search & Filter Bar -->
+                        <div class="space-y-2.5">
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                <input type="text" 
+                                       id="search-input" 
+                                       placeholder="Cari nama, NIP/NIM, atau divisi..." 
+                                       oninput="filterLogs()"
+                                       class="w-full bg-dark-950/80 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                                >
+                                <button onclick="clearSearch()" id="btn-clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <!-- Filter Pills: ALL, IN, OUT -->
+                            <div class="flex items-center space-x-1.5 text-xs">
+                                <button onclick="setFilter('ALL')" id="filter-all" class="px-3 py-1 rounded-lg font-bold text-[11px] bg-brand-500 text-white transition">
+                                    Semua (<span id="count-filter-all">{{ today_records|length }}</span>)
+                                </button>
+                                <button onclick="setFilter('IN')" id="filter-in" class="px-3 py-1 rounded-lg font-bold text-[11px] text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition">
+                                    Masuk (<span id="count-filter-in">{{ in_count }}</span>)
+                                </button>
+                                <button onclick="setFilter('OUT')" id="filter-out" class="px-3 py-1 rounded-lg font-bold text-[11px] text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition">
+                                    Pulang (<span id="count-filter-out">{{ out_count }}</span>)
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Scrollable Log List -->
+                    <div class="p-4 overflow-y-auto flex-grow h-[480px] lg:h-[580px] space-y-3" id="log-list-container">
+                        
+                        <div id="log-list" class="space-y-2.5">
                             {% for log in today_records %}
-                            <li class="p-4 hover:bg-gray-50 transition">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex-shrink-0">
-                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                                            {{ log.name[0] }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">
-                                            {{ log.name }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 truncate">
-                                            {{ log.department }} | {{ log.user_code }}
-                                        </p>
-                                    </div>
-                                    <div class="flex flex-col items-end">
-                                        {% if log.status == 'IN' %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                MASUK
-                                            </span>
-                                        {% else %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                                PULANG
-                                            </span>
+                            <div class="log-item p-3.5 rounded-2xl bg-dark-900/70 border border-slate-800/80 hover:border-slate-700/80 transition-all flex items-center justify-between gap-3 group"
+                                 data-name="{{ log.name|lower }}" 
+                                 data-code="{{ log.user_code|lower }}" 
+                                 data-dept="{{ log.department|lower }}"
+                                 data-status="{{ log.status }}">
+                                
+                                <div class="flex items-center space-x-3.5 min-w-0">
+                                    <!-- Avatar / Snapshot preview -->
+                                    <div class="relative flex-shrink-0">
+                                        {% if log.snapshot_path %}
+                                        <img src="/snapshots/{{ log.snapshot_path }}" 
+                                             alt="{{ log.name }}" 
+                                             class="w-11 h-11 rounded-xl object-cover border border-slate-700 shadow-md cursor-pointer hover:scale-105 transition"
+                                             onclick="openSnapshotModal('/snapshots/{{ log.snapshot_path }}', '{{ log.name }}', '{{ log.timestamp }}', '{{ log.status }}')"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                        >
                                         {% endif %}
-                                        <span class="text-xs text-gray-400 mt-1">{{ log.timestamp.split(' ')[1] }}</span>
+                                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md {{ 'hidden' if log.snapshot_path else '' }}">
+                                            {{ log.name[0]|upper }}
+                                        </div>
+                                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-dark-900 {{ 'bg-emerald-500' if log.status == 'IN' else 'bg-amber-500' }}"></span>
+                                    </div>
+
+                                    <!-- User Info -->
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-brand-300 transition">
+                                                {{ log.name }}
+                                            </h4>
+                                            {% if log.confidence %}
+                                            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-brand-400 border border-brand-500/20">
+                                                {{ (log.confidence * 100)|round|int }}%
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300 text-[10px] font-medium">{{ log.department }}</span>
+                                            <span class="font-mono text-slate-500 text-[10px]">{{ log.user_code }}</span>
+                                        </p>
                                     </div>
                                 </div>
-                            </li>
+
+                                <!-- Status Badge & Time -->
+                                <div class="flex flex-col items-end flex-shrink-0">
+                                    {% if log.status == 'IN' %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                        <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i> MASUK
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                        <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i> PULANG
+                                    </span>
+                                    {% endif %}
+                                    <span class="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
+                                        <i class="fa-regular fa-clock text-[10px] text-slate-500"></i>
+                                        {{ log.timestamp.split(' ')[1] if ' ' in log.timestamp else log.timestamp }}
+                                    </span>
+                                </div>
+
+                            </div>
                             {% else %}
-                            <div class="p-8 text-center text-gray-400" id="empty-state">
-                                <i class="fas fa-inbox text-4xl mb-3"></i>
-                                <p>Belum ada data absensi hari ini.</p>
+                            <div id="empty-state" class="p-12 text-center text-slate-500 flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 rounded-2xl bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-3">
+                                    <i class="fa-solid fa-inbox text-2xl"></i>
+                                </div>
+                                <h5 class="text-sm font-semibold text-slate-400">Belum Ada Absensi Hari Ini</h5>
+                                <p class="text-xs text-slate-600 mt-1 max-w-xs">Data kehadiran akan otomatis muncul saat wajah terdeteksi kamera.</p>
                             </div>
                             {% endfor %}
-                        </ul>
+                        </div>
+
+                    </div>
+
+                    <!-- Feed Footer -->
+                    <div class="px-5 py-3 bg-dark-900/80 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Live WebSocket / Polling Aktif
+                        </span>
+                        <a href="/api/export" class="text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
+                            Unduh Rekap Lengkap <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 bg-dark-950/90 py-5 mt-auto z-10">
+        <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-400 font-bold">&copy; 2026 AbsensiYolo</span>
+                <span>• Sistem Presensi Pintar Berbasis Computer Vision & Deep Learning</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="font-mono text-slate-400">Status: <span class="text-emerald-400">ONLINE</span></span>
+                <span>•</span>
+                <span class="font-mono text-slate-400">FastAPI + OpenCV</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL: DAFTAR KARYAWAN -->
+    <div id="users-modal" class="fixed inset-0 bg-dark-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl border border-slate-800 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-float">
+            
+            <!-- Modal Header -->
+            <div class="p-6 bg-dark-900/90 border-b border-slate-800/80 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                        <i class="fa-solid fa-users text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Daftar Karyawan Terdaftar</h3>
+                        <p class="text-xs text-slate-400">Data wajah dan profil yang tersimpan dalam sistem</p>
                     </div>
                 </div>
+                <button onclick="closeUsersModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Search -->
+            <div class="p-4 bg-dark-950/60 border-b border-slate-800/60">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" 
+                           id="modal-user-search" 
+                           placeholder="Cari berdasarkan nama atau kode..." 
+                           oninput="filterModalUsers()"
+                           class="w-full bg-dark-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                    >
+                </div>
+            </div>
+
+            <!-- Modal Body (User List) -->
+            <div class="p-4 overflow-y-auto flex-grow space-y-2" id="modal-users-list">
+                <div class="text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-brand-400"></i>
+                    <p class="text-xs">Memuat data karyawan...</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-dark-900/90 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                <span>Total: <strong id="modal-total-count" class="text-white">0</strong> Karyawan</span>
+                <button onclick="closeUsersModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition">
+                    Tutup
+                </button>
             </div>
 
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center text-sm text-gray-500">
-            <div>&copy; 2026 AI Camera Absensi by Hasboy. All rights reserved.</div>
-            <div>Versi 1.0.0 (Web Dashboard Demo)</div>
+    <!-- MODAL: SNAPSHOT VIEWER -->
+    <div id="snapshot-modal" class="fixed inset-0 bg-dark-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl border border-slate-800 max-w-lg w-full overflow-hidden shadow-2xl">
+            <div class="p-4 bg-dark-900/90 border-b border-slate-800/80 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-camera text-brand-400"></i>
+                    <h4 class="text-sm font-bold text-white" id="modal-snapshot-title">Snapshot Bukti Absensi</h4>
+                </div>
+                <button onclick="closeSnapshotModal()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+            <div class="p-4 bg-dark-950 flex flex-col items-center">
+                <div class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl max-h-[360px] w-full bg-black flex items-center justify-center">
+                    <img id="modal-snapshot-img" src="" alt="Bukti Foto" class="max-h-[360px] w-auto object-contain">
+                </div>
+                <div class="w-full mt-4 p-3 bg-dark-900 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+                    <div>
+                        <p class="font-bold text-white" id="modal-snapshot-name">-</p>
+                        <p class="text-slate-400 text-[11px]" id="modal-snapshot-time">-</p>
+                    </div>
+                    <span id="modal-snapshot-status" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        MASUK
+                    </span>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
 
+    <!-- DASHBOARD JAVASCRIPT LOGIC -->
     <script>
-        // Realtime Clock
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
-        }, 1000);
+        // State Variables
+        let currentFilter = 'ALL';
+        let isAudioEnabled = true;
+        let lastKnownLogId = 0;
+        let audioContext = null;
+        let registeredUsers = [];
 
-        // Auto-refresh logs every 3 seconds
-        setInterval(() => {
-            fetch('/api/logs')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('stat-hadir').innerText = data.length;
-                    
-                    const logList = document.getElementById('log-list');
-                    if (data.length === 0) {
-                        logList.innerHTML = `
-                            <div class="p-8 text-center text-gray-400" id="empty-state">
-                                <i class="fas fa-inbox text-4xl mb-3"></i>
-                                <p>Belum ada data absensi hari ini.</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    let html = '';
-                    data.forEach(log => {
-                        const statusBadge = log.status === 'IN' 
-                            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">MASUK</span>'
-                            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">PULANG</span>';
-                        
-                        const time = log.timestamp.split(' ')[1];
-                        
-                        html += `
-                            <li class="p-4 hover:bg-gray-50 transition">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex-shrink-0">
-                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                                            ${log.name[0]}
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">${log.name}</p>
-                                        <p class="text-xs text-gray-500 truncate">${log.department} | ${log.user_code}</p>
-                                    </div>
-                                    <div class="flex flex-col items-end">
-                                        ${statusBadge}
-                                        <span class="text-xs text-gray-400 mt-1">${time}</span>
-                                    </div>
-                                </div>
-                            </li>
-                        `;
-                    });
-                    logList.innerHTML = html;
+        // 1. Digital Clock & Indonesian Date
+        function updateClock() {
+            const now = new Date();
+            
+            // Format Jam
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('digital-clock').innerText = `${hours}:${minutes}:${seconds} WIB`;
+
+            // Format Tanggal Indonesia
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const dayName = days[now.getDay()];
+            const dateNum = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+
+            document.getElementById('digital-date').innerText = `${dayName}, ${dateNum} ${monthName} ${year}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Synthesized Futuristic Audio Chime (Web Audio API)
+        function playChime(isCheckIn = true) {
+            if (!isAudioEnabled) return;
+
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.type = 'sine';
+                
+                // Frekuensi: Cepat naik untuk chime futuristik
+                const baseFreq = isCheckIn ? 587.33 : 440.00; // D5 atau A4
+                osc.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, audioContext.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.36);
+            } catch (err) {
+                console.warn("Audio chime failed: ", err);
+            }
+        }
+
+        // Toggle Audio
+        function toggleAudio() {
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('audio-icon');
+            const indicator = document.getElementById('audio-indicator');
+
+            if (isAudioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-base';
+                indicator.className = 'absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-dark-950';
+                showToast("Suara Aktif", "Notifikasi audio saat absensi dinyalakan.", "info");
+                playChime(true);
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-base text-slate-500';
+                indicator.className = 'absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-slate-600 ring-2 ring-dark-950';
+                showToast("Suara Dibisukan", "Notifikasi audio dinonaktifkan.", "info");
+            }
+        }
+
+        // 3. Mode Switcher (AUTO, IN, OUT)
+        async function setMode(newMode) {
+            try {
+                const response = await fetch('/api/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: newMode })
                 });
-        }, 3000);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateModeUI(data.mode);
+                    showToast("Mode Diubah", `Sistem kini berjalan di mode: ${data.mode}`, "success");
+                }
+            } catch (err) {
+                console.error("Gagal mengubah mode: ", err);
+            }
+        }
+
+        function updateModeUI(mode) {
+            const modes = ['AUTO', 'IN', 'OUT'];
+            modes.forEach(m => {
+                const btnDesktop = document.getElementById(`btn-mode-${m.toLowerCase()}`);
+                const btnMobile = document.getElementById(`btn-mode-${m.toLowerCase()}-m`);
+
+                let activeClass = '';
+                if (m === 'AUTO') activeClass = 'bg-brand-500 text-white shadow-lg shadow-brand-500/25';
+                if (m === 'IN') activeClass = 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25';
+                if (m === 'OUT') activeClass = 'bg-amber-500 text-white shadow-lg shadow-amber-500/25';
+
+                const defaultClass = 'text-slate-400 hover:text-white hover:bg-slate-800/60';
+
+                if (btnDesktop) {
+                    btnDesktop.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${m === mode ? activeClass : defaultClass}`;
+                }
+                if (btnMobile) {
+                    btnMobile.className = `px-3 py-1 rounded-xl text-xs font-bold ${m === mode ? activeClass : 'text-slate-400 bg-slate-800'}`;
+                }
+            });
+
+            const hudPill = document.getElementById('hud-mode-pill');
+            if (hudPill) hudPill.innerText = `⚡ MODE: ${mode}`;
+        }
+
+        // 4. Toast Notifications
+        function showToast(title, message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let borderCol = type === 'success' ? 'border-emerald-500/40 text-emerald-400' : (type === 'amber' ? 'border-amber-500/40 text-amber-400' : 'border-brand-500/40 text-brand-400');
+            let iconClass = type === 'success' ? 'fa-solid fa-circle-check' : (type === 'amber' ? 'fa-solid fa-right-from-bracket' : 'fa-solid fa-bell');
+
+            toast.className = `toast-animate glass-panel pointer-events-auto p-4 rounded-2xl border ${borderCol} shadow-2xl flex items-center space-x-3.5 max-w-sm`;
+            toast.innerHTML = `
+                <div class="text-xl flex-shrink-0">${`<i class="${iconClass}"></i>`}</div>
+                <div class="flex-1 min-w-0">
+                    <h5 class="text-xs font-bold text-white truncate">${title}</h5>
+                    <p class="text-[11px] text-slate-300 truncate">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'all 0.3s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // 5. Laser Scanner Toggle
+        let scannerActive = true;
+        function toggleScanner() {
+            scannerActive = !scannerActive;
+            const line = document.getElementById('scanner-line');
+            const btn = document.getElementById('btn-toggle-scanner');
+            if (line) {
+                line.style.display = scannerActive ? 'block' : 'none';
+            }
+            if (btn) {
+                btn.className = scannerActive 
+                    ? 'p-1.5 rounded-lg bg-brand-500/20 text-brand-400 border border-brand-500/40 transition' 
+                    : 'p-1.5 rounded-lg bg-dark-950 text-slate-400 hover:text-brand-400 border border-slate-800 transition';
+            }
+        }
+
+        // 6. Camera Fullscreen Toggle
+        function toggleFullscreenCamera() {
+            const container = document.getElementById('camera-container');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // 7. Stream error & reload handlers
+        function handleStreamError(img) {
+            document.getElementById('stream-fallback').classList.remove('hidden');
+        }
+
+        function reloadStream() {
+            const img = document.getElementById('video-stream');
+            document.getElementById('stream-fallback').classList.add('hidden');
+            img.src = '/video_feed?t=' + new Date().getTime();
+        }
+
+        // 8. Auto Poll for Attendance Logs & KPI Stats
+        async function fetchLogsAndStats() {
+            try {
+                // Fetch Stats
+                const statsRes = await fetch('/api/stats');
+                if (statsRes.ok) {
+                    const stats = await statsRes.json();
+                    
+                    document.getElementById('stat-total-users').innerText = stats.total_users;
+                    document.getElementById('stat-total-users-sub').innerText = stats.total_users;
+                    document.getElementById('stat-unique-today').innerText = stats.unique_today;
+                    document.getElementById('stat-total-attendance').innerText = stats.total_attendance;
+                    document.getElementById('stat-in-count').innerText = stats.in_count;
+                    document.getElementById('stat-out-count').innerText = stats.out_count;
+                    
+                    document.getElementById('count-filter-all').innerText = stats.total_attendance;
+                    document.getElementById('count-filter-in').innerText = stats.in_count;
+                    document.getElementById('count-filter-out').innerText = stats.out_count;
+
+                    // Update Rate & Bar
+                    document.getElementById('stat-rate-badge').innerText = `${stats.attendance_rate}%`;
+                    document.getElementById('stat-progress-bar').style.width = `${stats.attendance_rate}%`;
+                    
+                    let rateLabel = 'Awal Hari';
+                    if (stats.attendance_rate >= 75) rateLabel = 'Optimal';
+                    else if (stats.attendance_rate >= 40) rateLabel = 'Sedang';
+                    document.getElementById('stat-rate-text').innerText = rateLabel;
+
+                    updateModeUI(stats.current_mode);
+                }
+
+                // Fetch Logs
+                const logsRes = await fetch('/api/logs');
+                if (logsRes.ok) {
+                    const logs = await logsRes.json();
+                    renderLogs(logs);
+                }
+            } catch (err) {
+                console.warn("Polling error:", err);
+            }
+        }
+
+        function renderLogs(logs) {
+            const listContainer = document.getElementById('log-list');
+            document.getElementById('log-count-badge').innerText = `${logs.length} Catatan`;
+
+            if (!logs || logs.length === 0) {
+                listContainer.innerHTML = `
+                    <div id="empty-state" class="p-12 text-center text-slate-500 flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 rounded-2xl bg-dark-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-3">
+                            <i class="fa-solid fa-inbox text-2xl"></i>
+                        </div>
+                        <h5 class="text-sm font-semibold text-slate-400">Belum Ada Absensi Hari Ini</h5>
+                        <p class="text-xs text-slate-600 mt-1 max-w-xs">Data kehadiran akan otomatis muncul saat wajah terdeteksi kamera.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Check if there is a NEW attendance record to trigger toast & sound
+            if (logs.length > 0) {
+                const latest = logs[0];
+                if (lastKnownLogId !== 0 && latest.id > lastKnownLogId) {
+                    const statusText = latest.status === 'IN' ? 'Masuk' : 'Pulang';
+                    const toastType = latest.status === 'IN' ? 'success' : 'amber';
+                    showToast(`[✓ ABSEN ${statusText.toUpperCase()}]`, `${latest.name} (${latest.department})`, toastType);
+                    playChime(latest.status === 'IN');
+                }
+                lastKnownLogId = latest.id;
+            }
+
+            let html = '';
+            logs.forEach(log => {
+                const isIN = log.status === 'IN';
+                const statusBadge = isIN
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                         <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i> MASUK
+                       </span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                         <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i> PULANG
+                       </span>`;
+
+                const timeStr = log.timestamp.includes(' ') ? log.timestamp.split(' ')[1] : log.timestamp;
+                const confScore = log.confidence ? Math.round(log.confidence * 100) : null;
+                const confChip = confScore ? `<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-brand-400 border border-brand-500/20">${confScore}%</span>` : '';
+
+                let avatarHtml = '';
+                if (log.snapshot_path) {
+                    avatarHtml = `
+                        <img src="/snapshots/${log.snapshot_path}" 
+                             alt="${log.name}" 
+                             class="w-11 h-11 rounded-xl object-cover border border-slate-700 shadow-md cursor-pointer hover:scale-105 transition"
+                             onclick="openSnapshotModal('/snapshots/${log.snapshot_path}', '${log.name}', '${log.timestamp}', '${log.status}')"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 hidden items-center justify-center text-white font-bold text-base shadow-md">
+                            ${log.name[0].toUpperCase()}
+                        </div>
+                    `;
+                } else {
+                    avatarHtml = `
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md">
+                            ${log.name[0].toUpperCase()}
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="log-item p-3.5 rounded-2xl bg-dark-900/70 border border-slate-800/80 hover:border-slate-700/80 transition-all flex items-center justify-between gap-3 group"
+                         data-name="${log.name.toLowerCase()}" 
+                         data-code="${(log.user_code || '').toLowerCase()}" 
+                         data-dept="${(log.department || '').toLowerCase()}"
+                         data-status="${log.status}">
+                        
+                        <div class="flex items-center space-x-3.5 min-w-0">
+                            <div class="relative flex-shrink-0">
+                                ${avatarHtml}
+                                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-dark-900 ${isIN ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-brand-300 transition">
+                                        ${log.name}
+                                    </h4>
+                                    ${confChip}
+                                </div>
+                                <p class="text-[11px] text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300 text-[10px] font-medium">${log.department || 'Umum'}</span>
+                                    <span class="font-mono text-slate-500 text-[10px]">${log.user_code || '-'}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-end flex-shrink-0">
+                            ${statusBadge}
+                            <span class="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-[10px] text-slate-500"></i>
+                                ${timeStr}
+                            </span>
+                        </div>
+
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+            filterLogs(); // Re-apply active search/filter on newly rendered list
+        }
+
+        // 9. Filter & Search Controls
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            ['ALL', 'IN', 'OUT'].forEach(f => {
+                const btn = document.getElementById(`filter-${f.toLowerCase()}`);
+                if (btn) {
+                    if (f === filterType) {
+                        btn.className = 'px-3 py-1 rounded-lg font-bold text-[11px] bg-brand-500 text-white transition';
+                    } else {
+                        btn.className = 'px-3 py-1 rounded-lg font-bold text-[11px] text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition';
+                    }
+                }
+            });
+            filterLogs();
+        }
+
+        function filterLogs() {
+            const query = (document.getElementById('search-input').value || '').trim().toLowerCase();
+            const clearBtn = document.getElementById('btn-clear-search');
+            if (clearBtn) {
+                clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+            }
+
+            const items = document.querySelectorAll('.log-item');
+            items.forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                const code = item.getAttribute('data-code') || '';
+                const dept = item.getAttribute('data-dept') || '';
+                const status = item.getAttribute('data-status') || '';
+
+                const matchesQuery = query === '' || name.includes(query) || code.includes(query) || dept.includes(query);
+                const matchesFilter = currentFilter === 'ALL' || status === currentFilter;
+
+                item.style.display = (matchesQuery && matchesFilter) ? 'flex' : 'none';
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            filterLogs();
+        }
+
+        // 10. Modals Logic
+        async function openUsersModal() {
+            document.getElementById('users-modal').classList.remove('hidden');
+            try {
+                const res = await fetch('/api/users');
+                if (res.ok) {
+                    registeredUsers = await res.json();
+                    renderModalUsers(registeredUsers);
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data user:", err);
+            }
+        }
+
+        function closeUsersModal() {
+            document.getElementById('users-modal').classList.add('hidden');
+        }
+
+        function renderModalUsers(users) {
+            const container = document.getElementById('modal-users-list');
+            document.getElementById('modal-total-count').innerText = users.length;
+
+            if (users.length === 0) {
+                container.innerHTML = '<p class="text-center py-6 text-slate-500 text-xs">Belum ada karyawan terdaftar.</p>';
+                return;
+            }
+
+            let html = '';
+            users.forEach(u => {
+                html += `
+                    <div class="user-row p-3 rounded-xl bg-dark-900/60 border border-slate-800 flex items-center justify-between"
+                         data-name="${u.name.toLowerCase()}" data-code="${(u.user_code || '').toLowerCase()}" data-dept="${(u.department || '').toLowerCase()}">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                                ${u.name[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-white">${u.name}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">${u.user_code} • ${u.department || 'Umum'}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                            TERDAFTAR
+                        </span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterModalUsers() {
+            const query = (document.getElementById('modal-user-search').value || '').trim().toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+            rows.forEach(r => {
+                const name = r.getAttribute('data-name') || '';
+                const code = r.getAttribute('data-code') || '';
+                const dept = r.getAttribute('data-dept') || '';
+                r.style.display = (query === '' || name.includes(query) || code.includes(query) || dept.includes(query)) ? 'flex' : 'none';
+            });
+        }
+
+        function openSnapshotModal(imgUrl, name, time, status) {
+            document.getElementById('modal-snapshot-img').src = imgUrl;
+            document.getElementById('modal-snapshot-name').innerText = name;
+            document.getElementById('modal-snapshot-time').innerText = `Waktu: ${time}`;
+            
+            const badge = document.getElementById('modal-snapshot-status');
+            if (status === 'IN') {
+                badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                badge.innerText = 'MASUK';
+            } else {
+                badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                badge.innerText = 'PULANG';
+            }
+
+            document.getElementById('snapshot-modal').classList.remove('hidden');
+        }
+
+        function closeSnapshotModal() {
+            document.getElementById('snapshot-modal').classList.add('hidden');
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeUsersModal();
+                closeSnapshotModal();
+            }
+        });
+
+        // Initialize polling every 3 seconds
+        setInterval(fetchLogsAndStats, 3000);
     </script>
 </body>
 </html>
